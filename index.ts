@@ -8,6 +8,8 @@ import { dirname } from 'path';
 import * as fsPromise from 'fs/promises';
 import { setTimeout } from 'timers';
 import sortSlides from './utils/sortSlides';
+import * as path from 'path';
+import generateFileBuffer from './utils/generateFileBuffer';
 
 const xmlParser = new XMLParser({
   ignoreAttributes: false,
@@ -84,7 +86,7 @@ class Slide {
     this.raw = xml.toString();
     this.textNodes = {};
     this.generateTextNodes();
-    this.slideFile = '';
+    this.slideFile = file;
   }
 
   generateTextNodes() {
@@ -124,24 +126,37 @@ class Presentation {
     this.extractSlides(filePath);
     this.slides = [];
   }
+  async generateSlides(files: string[]) {
+    const filePathsAndNames = files.map((fname) => {
+      return {
+        fileName: fname,
+        filePath: `./extract-to/ppt/slides/${fname}`,
+      };
+    });
+    const prepareSlides = async (fPathAndNames: typeof filePathsAndNames) => {
+      return Promise.all(
+        fPathAndNames.map(async ({ fileName, filePath }) => {
+          return {
+            fileBuffer: await generateFileBuffer(filePath),
+            fileName: fileName,
+          };
+        })
+      );
+    };
+    const allSlides = await prepareSlides(filePathsAndNames);
+    allSlides.forEach(({ fileBuffer, fileName }) => {
+      const newSlide = new Slide(fileBuffer, fileName);
+      this.slides = [...this.slides, newSlide];
+    });
+  }
   extractSlides(directoryPath: string) {
     fs.readdir('./extract-to/ppt/slides', (err, files) => {
       const filterRels = files.filter((file) => file != '_rels');
       const sortedFiles = sortSlides(filterRels);
+      if (sortedFiles) {
+        return this.generateSlides(sortedFiles);
+      }
       const resultArray: Slide[] = [];
-      const generateFileBuffers = async () => {
-        return await Promise.all(
-          sorted.map((file) =>
-            fsPromise.readFile(`./extract-to/ppt/slides/${file}`)
-          )
-        );
-      };
-      generateFileBuffers().then((res) => {
-        res.forEach((buffer) => {
-          const slide = new Slide(buffer);
-          this.slides.push(slide);
-        });
-      });
     });
   }
 }
@@ -159,3 +174,5 @@ setTimeout(() => {
     });
   });
 }, 2000);
+
+console.log(path.resolve('./extract-to/ppt/'));
