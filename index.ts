@@ -12,6 +12,7 @@ import * as path from 'path';
 import generateFileBuffer from './utils/generateFileBuffer';
 import prepareSlides from './utils/prepareSlides';
 import { SlideConstructorProps } from './types';
+import { error } from 'console';
 
 const xmlParser = new XMLParser({
   ignoreAttributes: false,
@@ -83,12 +84,14 @@ class Slide {
     };
   };
   slideName;
+  testStr;
 
   constructor(bufferOrString: Buffer | string, slideName: string) {
     this.raw = bufferOrString.toString();
     this.textNodes = {};
     this.generateTextNodes();
     this.slideName = slideName;
+    this.testStr = '';
   }
 
   generateTextNodes() {
@@ -117,11 +120,29 @@ class Slide {
   }
   editTextNode(nodeId: string, text: string) {
     const nodeToEdit = this.textNodes[`textNode-${nodeId}`];
-    this.handleEdit(nodeToEdit.text);
+    if (!nodeToEdit) {
+      throw new Error("Node doesn't exist");
+    }
+    if (!nodeToEdit.startingIndex) {
+      throw new Error('Invalid node index');
+    }
+    this.handleEdit(nodeToEdit.startingIndex, text);
   }
-  handleEdit(node: string) {}
+  handleEdit(nodeStartingIndex: number, newText: string) {
+    let string = '';
+    const endingRegex = /<\/a:t>/g;
+    endingRegex.lastIndex = nodeStartingIndex;
+    const endOfString = endingRegex.exec(this.raw)
+      ?.index as RegExpExecArray['index'];
+    console.log(this.raw[endOfString]);
+    const test =
+      this.raw.substring(nodeStartingIndex, 0) +
+      newText +
+      this.raw.substring(endOfString);
+    this.raw = test;
+    this.generateTextNodes();
+  }
 }
-
 class Presentation {
   slides: Slide[];
   constructor(filePath: string) {
@@ -161,13 +182,18 @@ const pres = new Presentation('./extract-to');
 
 const temp: Slide[] = [];
 setTimeout(() => {
-  pres.slides.forEach((slide) => {
+  pres.slides.forEach((slide, index) => {
     Object.values(slide.textNodes).map((node) => {
       if (node.text === 'Instructions or Question goes here') {
-        temp.push(slide);
-        console.log(slide.textNodes);
+        temp.push(pres.slides[index]);
       }
     });
+  });
+  temp.forEach((slide, index) => {
+    slide.editTextNode('1', 'THIS IS A QUESTION');
+    slide.editTextNode('2', 'THIS IS AN ADDITIONAL INFO SECTION');
+    slide.editTextNode('3', 'THIS IS AN ANSWER');
+    fs.writeFile(`./testFiles/slide-${index}`, slide.raw, {}, () => {});
   });
 }, 2000);
 
