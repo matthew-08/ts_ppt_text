@@ -1,3 +1,5 @@
 #!/bin/sh
+echo $1;
+echo $2;
 
-unzip -d ./extract-to ./test.pptx
+unzip -d "$1/" "$2"

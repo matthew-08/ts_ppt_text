@@ -9,12 +9,12 @@ import replaceXMLText from './utils/replaceXMLText';
 import handleGenNewppt from './utils/handleGenNewPpt';
 import handleGenNewPpt from './utils/handleGenNewPpt';
 
-exec('sh extract.sh', (error, stdout, stderr) => {
+/* exec('sh extract.sh', (error, stdout, stderr) => {
   if (error || stderr) {
     console.log(error || stderr);
   }
   console.log(stdout);
-});
+}); */
 /* fs.readFile('./extract-to/ppt/slides/slide2.xml', (err, buffer) => {
   const xml = buffer.toString();
 
@@ -133,9 +133,9 @@ class Slide {
     );
     this.generateTextNodes();
   }
-  writeToFile() {
+  writeToFile(tempDirectory: string) {
     return fs.writeFile(
-      `./extract-to/ppt/slides/${this.slideName}`,
+      path.resolve(`${tempDirectory}/ppt/slides/${this.slideName}`),
       this.raw,
       {},
       () => {}
@@ -144,9 +144,26 @@ class Slide {
 }
 class Presentation {
   slides: Slide[];
+  filePath: string;
+  tempDirectory: string;
   constructor(filePath: string) {
-    this.extractSlides(filePath);
+    this.filePath = filePath;
+    this.tempDirectory = './_ppt-temp_';
+    this.generateTempFile();
+    this.extractSlides();
     this.slides = [];
+  }
+  generateTempFile() {
+    console.log(this.tempDirectory);
+    exec(
+      `sh extract.sh ${this.tempDirectory} ${this.filePath}`,
+      (error, stdout, stderr) => {
+        if (error || stderr) {
+          console.log(error || stderr);
+        }
+        console.log(stdout);
+      }
+    );
   }
   addSlides(preparedSlides: SlideConstructorProps[]) {
     preparedSlides.forEach(({ bufferOrString, slideName }) => {
@@ -158,34 +175,36 @@ class Presentation {
     const filePathsAndNames = files.map((fname) => {
       return {
         fileName: fname,
-        filePath: `./extract-to/ppt/slides/${fname}`,
+        filePath: path.resolve(`${this.tempDirectory}/ppt/slides/${fname}`),
       };
     });
     // prepareSlides generates what is needed for the slide class constructor
     const allSlides = await prepareSlides(filePathsAndNames);
     this.addSlides(allSlides);
   }
-  extractSlides(directoryPath: string) {
-    fs.readdir('./extract-to/ppt/slides', (err, files) => {
+  extractSlides() {
+    fs.readdir(`${this.tempDirectory}/ppt/slides`, (err, files) => {
       const filterRels = files.filter((file) => file != '_rels');
       const sortedFiles = sortSlides(filterRels);
       if (sortedFiles) {
         return this.generateSlides(sortedFiles);
       }
-      const resultArray: Slide[] = [];
     });
   }
   applySlideChanges() {
     this.slides.forEach((slide) => {
-      slide.writeToFile();
+      slide.writeToFile(this.tempDirectory);
     });
   }
   generateNewPPT(outputDir: string) {
-    handleGenNewPpt('./extract-to', path.resolve('./test/'));
+    handleGenNewPpt(
+      path.resolve(outputDir),
+      path.resolve(`${this.tempDirectory}`)
+    );
   }
 }
 
-const pres = new Presentation('./extract-to');
+const pres = new Presentation('test.pptx');
 
 const temp: Slide[] = [];
 setTimeout(() => {
@@ -196,14 +215,6 @@ setTimeout(() => {
       }
     });
   });
-  temp.forEach((slide, index) => {
-    slide.editTextNode('1', 'booty');
-    slide.editTextNode('2', 'THIS IS AN ADDITIONAL INFO SECTION');
-    slide.editTextNode('3', 'THIS IS AN ANSWER');
-    fs.writeFile(`./testFiles/slide-${index}`, slide.raw, {}, () => {});
-  });
   pres.applySlideChanges();
-  pres.generateNewPPT('e');
+  pres.generateNewPPT('./booty/hey');
 }, 2000);
-
-console.log(path.resolve('./extract-to/ppt/'));
