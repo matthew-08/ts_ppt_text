@@ -6,6 +6,8 @@ import * as path from 'path';
 import prepareSlides from './utils/prepareSlides';
 import { SlideConstructorProps } from './types';
 import replaceXMLText from './utils/replaceXMLText';
+import handleGenNewppt from './utils/handleGenNewPpt';
+import handleGenNewPpt from './utils/handleGenNewPpt';
 
 exec('sh extract.sh', (error, stdout, stderr) => {
   if (error || stderr) {
@@ -131,6 +133,14 @@ class Slide {
     );
     this.generateTextNodes();
   }
+  writeToFile() {
+    return fs.writeFile(
+      `./extract-to/ppt/slides/${this.slideName}`,
+      this.raw,
+      {},
+      () => {}
+    );
+  }
 }
 class Presentation {
   slides: Slide[];
@@ -167,13 +177,11 @@ class Presentation {
   }
   applySlideChanges() {
     this.slides.forEach((slide) => {
-      fs.writeFile(
-        `./extract-to/ppt/slides/${slide.slideName}`,
-        slide.raw,
-        {},
-        () => {}
-      );
+      slide.writeToFile();
     });
+  }
+  generateNewPPT(outputDir: string) {
+    handleGenNewPpt('./extract-to', path.resolve('./test/'));
   }
 }
 
@@ -195,6 +203,7 @@ setTimeout(() => {
     fs.writeFile(`./testFiles/slide-${index}`, slide.raw, {}, () => {});
   });
   pres.applySlideChanges();
+  pres.generateNewPPT('e');
 }, 2000);
 
 console.log(path.resolve('./extract-to/ppt/'));
