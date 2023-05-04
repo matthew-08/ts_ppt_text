@@ -1,24 +1,11 @@
 import * as fs from 'fs';
-import { unzip } from 'node:zlib';
 import { exec } from 'child_process';
-import { stdout } from 'process';
-import { XMLParser } from 'fast-xml-parser';
-import * as util from 'node:util';
-import { dirname } from 'path';
-import * as fsPromise from 'fs/promises';
 import { setTimeout } from 'timers';
 import sortSlides from './utils/sortSlides';
 import * as path from 'path';
-import generateFileBuffer from './utils/generateFileBuffer';
 import prepareSlides from './utils/prepareSlides';
 import { SlideConstructorProps } from './types';
-import { error } from 'console';
 import replaceXMLText from './utils/replaceXMLText';
-
-const xmlParser = new XMLParser({
-  ignoreAttributes: false,
-});
-const options = {};
 
 exec('sh extract.sh', (error, stdout, stderr) => {
   if (error || stderr) {
@@ -192,7 +179,7 @@ setTimeout(() => {
     });
   });
   temp.forEach((slide, index) => {
-    slide.editTextNode('1', 'THIS IS A QUESTION');
+    slide.editTextNode('1', 'booty');
     slide.editTextNode('2', 'THIS IS AN ADDITIONAL INFO SECTION');
     slide.editTextNode('3', 'THIS IS AN ANSWER');
     fs.writeFile(`./testFiles/slide-${index}`, slide.raw, {}, () => {});
