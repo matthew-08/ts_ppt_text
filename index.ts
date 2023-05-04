@@ -10,6 +10,8 @@ import { setTimeout } from 'timers';
 import sortSlides from './utils/sortSlides';
 import * as path from 'path';
 import generateFileBuffer from './utils/generateFileBuffer';
+import prepareSlides from './utils/prepareSlides';
+import { SlideConstructorProps } from './types';
 
 const xmlParser = new XMLParser({
   ignoreAttributes: false,
@@ -80,13 +82,13 @@ class Slide {
       startingIndex: number | null;
     };
   };
-  slideFile;
+  slideName;
 
-  constructor(xml: Buffer | string, file: string) {
-    this.raw = xml.toString();
+  constructor(bufferOrString: Buffer | string, slideName: string) {
+    this.raw = bufferOrString.toString();
     this.textNodes = {};
     this.generateTextNodes();
-    this.slideFile = file;
+    this.slideName = slideName;
   }
 
   generateTextNodes() {
@@ -126,6 +128,12 @@ class Presentation {
     this.extractSlides(filePath);
     this.slides = [];
   }
+  addSlides(preparedSlides: SlideConstructorProps[]) {
+    preparedSlides.forEach(({ bufferOrString, slideName }) => {
+      const slide = new Slide(bufferOrString, slideName);
+      this.slides = [...this.slides, slide];
+    });
+  }
   async generateSlides(files: string[]) {
     const filePathsAndNames = files.map((fname) => {
       return {
@@ -133,21 +141,9 @@ class Presentation {
         filePath: `./extract-to/ppt/slides/${fname}`,
       };
     });
-    const prepareSlides = async (fPathAndNames: typeof filePathsAndNames) => {
-      return Promise.all(
-        fPathAndNames.map(async ({ fileName, filePath }) => {
-          return {
-            fileBuffer: await generateFileBuffer(filePath),
-            fileName: fileName,
-          };
-        })
-      );
-    };
+    // prepareSlides generates what is needed for the slide class constructor
     const allSlides = await prepareSlides(filePathsAndNames);
-    allSlides.forEach(({ fileBuffer, fileName }) => {
-      const newSlide = new Slide(fileBuffer, fileName);
-      this.slides = [...this.slides, newSlide];
-    });
+    this.addSlides(allSlides);
   }
   extractSlides(directoryPath: string) {
     fs.readdir('./extract-to/ppt/slides', (err, files) => {

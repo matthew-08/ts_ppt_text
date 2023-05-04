@@ -1,15 +1,16 @@
 import generateFileBuffer from './generateFileBuffer';
+import type { SlideConstructorProps } from '../types';
 const prepareSlides = async (
   fPathAndNames: {
     fileName: string;
     filePath: string;
   }[]
-) => {
+): Promise<SlideConstructorProps[]> => {
   return Promise.all(
     fPathAndNames.map(async ({ fileName, filePath }) => {
       return {
-        fileBuffer: await generateFileBuffer(filePath),
-        fileName: fileName,
+        bufferOrString: await generateFileBuffer(filePath),
+        slideName: fileName,
       };
     })
   );
