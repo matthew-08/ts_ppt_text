@@ -165,6 +165,16 @@ class Presentation {
       const resultArray: Slide[] = [];
     });
   }
+  applySlideChanges() {
+    this.slides.forEach((slide) => {
+      fs.writeFile(
+        `./extract-to/ppt/slides/${slide.slideName}`,
+        slide.raw,
+        {},
+        () => {}
+      );
+    });
+  }
 }
 
 const pres = new Presentation('./extract-to');
@@ -184,6 +194,7 @@ setTimeout(() => {
     slide.editTextNode('3', 'THIS IS AN ANSWER');
     fs.writeFile(`./testFiles/slide-${index}`, slide.raw, {}, () => {});
   });
+  pres.applySlideChanges();
 }, 2000);
 
 console.log(path.resolve('./extract-to/ppt/'));
