@@ -7,6 +7,7 @@ import * as util from 'node:util';
 import { dirname } from 'path';
 import * as fsPromise from 'fs/promises';
 import { setTimeout } from 'timers';
+import sortSlides from './utils/sortSlides';
 
 const xmlParser = new XMLParser({
   ignoreAttributes: false,
@@ -77,11 +78,13 @@ class Slide {
       startingIndex: number | null;
     };
   };
+  slideFile;
 
-  constructor(xml: Buffer | string) {
+  constructor(xml: Buffer | string, file: string) {
     this.raw = xml.toString();
     this.textNodes = {};
     this.generateTextNodes();
+    this.slideFile = '';
   }
 
   generateTextNodes() {
@@ -118,19 +121,13 @@ class Slide {
 class Presentation {
   slides: Slide[];
   constructor(filePath: string) {
-    this.readFile(filePath);
+    this.extractSlides(filePath);
     this.slides = [];
   }
-  readFile(filePath: string) {
+  extractSlides(directoryPath: string) {
     fs.readdir('./extract-to/ppt/slides', (err, files) => {
       const filterRels = files.filter((file) => file != '_rels');
-      const sorted = filterRels.sort((a, b) => {
-        a = a.replace('slide', '').replace('.xml', '');
-        b = b.replace('slide', '').replace('.xml', '');
-        if (+a > +b) return 1;
-        else if (+a < +b) return -1;
-        else return 0;
-      });
+      const sortedFiles = sortSlides(filterRels);
       const resultArray: Slide[] = [];
       const generateFileBuffers = async () => {
         return await Promise.all(
