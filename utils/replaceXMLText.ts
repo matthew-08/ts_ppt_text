@@ -11,3 +11,5 @@ const replaceXMLText = (
     rawXML.substring(startIndex, 0) + updatedText + rawXML.substring(endIndex)
   );
 };
+
+export default replaceXMLText;

@@ -13,6 +13,7 @@ import generateFileBuffer from './utils/generateFileBuffer';
 import prepareSlides from './utils/prepareSlides';
 import { SlideConstructorProps } from './types';
 import { error } from 'console';
+import replaceXMLText from './utils/replaceXMLText';
 
 const xmlParser = new XMLParser({
   ignoreAttributes: false,
@@ -129,17 +130,18 @@ class Slide {
     this.handleEdit(nodeToEdit.startingIndex, text);
   }
   handleEdit(nodeStartingIndex: number, newText: string) {
-    let string = '';
     const endingRegex = /<\/a:t>/g;
     endingRegex.lastIndex = nodeStartingIndex;
     const endOfString = endingRegex.exec(this.raw)
       ?.index as RegExpExecArray['index'];
-    console.log(this.raw[endOfString]);
-    const test =
-      this.raw.substring(nodeStartingIndex, 0) +
-      newText +
-      this.raw.substring(endOfString);
-    this.raw = test;
+    this.raw = replaceXMLText(
+      {
+        startIndex: nodeStartingIndex,
+        endIndex: endOfString,
+      },
+      newText,
+      this.raw
+    );
     this.generateTextNodes();
   }
 }
