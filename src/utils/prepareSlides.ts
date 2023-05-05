@@ -1,5 +1,5 @@
 import generateFileBuffer from './generateFileBuffer';
-import type { SlideConstructorProps } from '../../types';
+import type { SlideConstructorProps } from '../types';
 const prepareSlides = async (
   fPathAndNames: {
     fileName: string;

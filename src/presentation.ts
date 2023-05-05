@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
 import path from 'path';
-import { SlideConstructorProps } from '../types';
+import { SlideConstructorProps } from './types';
 import Slide from './slide';
 import prepareSlides from './utils/prepareSlides';
 import fs from 'fs/promises';
@@ -31,9 +31,11 @@ export default class Presentation {
     ]).then((res) => this.slides);
   }
   private generateTempFile() {
-    console.log(this.tempDirectory);
     exec(
-      `sh ./src/scripts/extract.sh ${this.tempDirectory} ${this.filePath}`,
+      `sh ./scripts/extract.sh ${this.tempDirectory} ${this.filePath}`,
+      {
+        cwd: path.join(process.cwd(), 'node_modules', 'ts_ppt_text', 'dist'),
+      },
       (error, stdout, stderr) => {
         if (error || stderr) {
           console.log(error || stderr);
