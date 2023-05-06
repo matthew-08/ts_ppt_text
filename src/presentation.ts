@@ -6,6 +6,7 @@ import prepareSlides from './utils/prepareSlides';
 import fs from 'fs/promises';
 import sortSlides from './utils/sortSlides';
 import handleGenNewPpt from './utils/handleGenNewPpt';
+import cwd from './utils/cwd';
 
 export default class Presentation {
   private slides: Slide[];
@@ -34,7 +35,7 @@ export default class Presentation {
     exec(
       `sh ./scripts/extract.sh ${this.tempDirectory} ${this.filePath}`,
       {
-        cwd: path.join(process.cwd(), 'node_modules', 'ts_ppt_text', 'dist'),
+        cwd: cwd(),
       },
       (error, stdout, stderr) => {
         if (error || stderr) {
