@@ -3,7 +3,7 @@ import cwd from './cwd';
 
 const handleGenNewPpt = (outputDir: string, inputDir: string) => {
   exec(
-    `sh ../scripts/extract.sh ${inputDir} ${outputDir}`,
+    `sh ./scripts/zip.sh ${inputDir} ${outputDir}`,
     {
       cwd: cwd(),
     },
