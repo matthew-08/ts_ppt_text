@@ -19,6 +19,7 @@ const prepareSlides_1 = __importDefault(require("./utils/prepareSlides"));
 const promises_1 = __importDefault(require("fs/promises"));
 const sortSlides_1 = __importDefault(require("./utils/sortSlides"));
 const handleGenNewPpt_1 = __importDefault(require("./utils/handleGenNewPpt"));
+const cwd_1 = __importDefault(require("./utils/cwd"));
 class Presentation {
     constructor(filePath, dirName) {
         this.filePath = filePath;
@@ -40,7 +41,7 @@ class Presentation {
     }
     generateTempFile() {
         (0, child_process_1.exec)(`sh ./scripts/extract.sh ${this.tempDirectory} ${this.filePath}`, {
-            cwd: path_1.default.join(process.cwd(), 'node_modules', 'ts_ppt_text', 'dist'),
+            cwd: (0, cwd_1.default)(),
         }, (error, stdout, stderr) => {
             if (error || stderr) {
                 console.log(error || stderr);
