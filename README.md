@@ -6,8 +6,8 @@ TypeScript PowerPoint Text is a library which allows for the modification of tex
 
 ```ts
    const presentation = new Presentation(
-        path.join(__dirname, `../example.pptx`),
-        path.join(__dirname, `../output/`)
+        path.join(__dirname, '../example.pptx'),
+        path.join(__dirname, '../output/')
     )
     
     const slides = await presentation.getSlides()
