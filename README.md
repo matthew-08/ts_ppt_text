@@ -1,6 +1,6 @@
 # ts_ppt_text
 
-TypeScript PowerPoint Text is a library which allows for the modification of text entries within PowerPoints.
+TypeScript PowerPoint Text is a library which allows for the modification of text entries within PowerPoint (.pptx, .ppt) files.
 
 ## Usage Example
 
