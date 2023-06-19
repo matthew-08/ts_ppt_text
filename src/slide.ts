@@ -1,6 +1,6 @@
 import replaceXMLText from './utils/replaceXMLText';
 import path from 'path';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 
 export default class Slide {
   raw;
@@ -71,12 +71,10 @@ export default class Slide {
     );
     this.generateTextNodes();
   }
-  writeToFile(tempDirectory: string) {
-    return fs.writeFile(
+  async writeToFile(tempDirectory: string) {
+    return await fs.writeFile(
       path.resolve(`${tempDirectory}/ppt/slides/${this.slideName}`),
       this.raw,
-      {},
-      () => {}
     );
   }
 }

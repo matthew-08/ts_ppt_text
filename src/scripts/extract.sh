@@ -1,3 +1,3 @@
 #!/bin/sh
 
-unzip -d "$1/" "$2"
+unzip -d -u "$1/" "$2"

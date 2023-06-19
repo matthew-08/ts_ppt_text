@@ -19,7 +19,8 @@ const prepareSlides_1 = __importDefault(require("./utils/prepareSlides"));
 const promises_1 = __importDefault(require("fs/promises"));
 const sortSlides_1 = __importDefault(require("./utils/sortSlides"));
 const handleGenNewPpt_1 = __importDefault(require("./utils/handleGenNewPpt"));
-const cwd_1 = __importDefault(require("./utils/cwd"));
+const util_1 = require("util");
+const promiseExec = (0, util_1.promisify)(child_process_1.exec);
 class Presentation {
     constructor(filePath, dirName) {
         this.filePath = filePath;
@@ -28,7 +29,6 @@ class Presentation {
         this.generateTempFile();
         this.slidesPreparing = null;
         this.slidesExtracting = null;
-        this.extractSlides();
         this.slides = [];
     }
     getSlides() {
@@ -40,13 +40,11 @@ class Presentation {
         });
     }
     generateTempFile() {
-        (0, child_process_1.exec)(`sh ./scripts/extract.sh ${this.tempDirectory} ${this.filePath}`, {
-            cwd: (0, cwd_1.default)(),
-        }, (error, stdout, stderr) => {
-            if (error || stderr) {
-                console.log(error || stderr);
-            }
-            console.log(stdout);
+        return __awaiter(this, void 0, void 0, function* () {
+            const s = () => this.extractSlides();
+            yield promiseExec(`sh ./src/scripts/extract.sh ${this.tempDirectory} ${this.filePath}`).then((res) => {
+                s();
+            });
         });
     }
     addSlides(preparedSlides) {

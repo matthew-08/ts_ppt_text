@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const child_process_1 = require("child_process");
 const cwd_1 = __importDefault(require("./cwd"));
 const handleGenNewPpt = (outputDir, inputDir) => {
-    (0, child_process_1.exec)(`sh ../scripts/extract.sh ${inputDir} ${outputDir}`, {
+    (0, child_process_1.exec)(`sh ./scripts/zip.sh ${inputDir} ${outputDir}`, {
         cwd: (0, cwd_1.default)(),
     }, (error, stdout, stderr) => {
         if (error || stderr) {

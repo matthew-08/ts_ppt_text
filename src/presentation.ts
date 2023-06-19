@@ -19,10 +19,8 @@ export default class Presentation {
     this.filePath = filePath;
     this.dirName = dirName;
     this.tempDirectory = `${this.dirName}/_ppt-temp_`;
-    this.generateTempFile();
     this.slidesPreparing = null;
     this.slidesExtracting = null;
-    this.extractSlides();
     this.slides = [];
   }
   async getSlides() {
@@ -31,19 +29,22 @@ export default class Presentation {
       this.slidesPreparing,
     ]).then((res) => this.slides);
   }
-  private generateTempFile() {
-    exec(
+  generateTempFile() {
+    const child = exec(
       `sh ./scripts/extract.sh ${this.tempDirectory} ${this.filePath}`,
       {
         cwd: cwd(),
       },
-      (error, stdout, stderr) => {
-        if (error || stderr) {
-          console.log(error || stderr);
-        }
+      (err, stdout) => {
         console.log(stdout);
       }
     );
+    return new Promise((resolve) => {
+      return child.on('close', (code) => {
+        console.log(code);
+        resolve(0);
+      });
+    });
   }
   private addSlides(preparedSlides: SlideConstructorProps[]) {
     preparedSlides.forEach(({ bufferOrString, slideName }) => {
@@ -64,7 +65,7 @@ export default class Presentation {
       return this.addSlides(res);
     });
   }
-  private extractSlides() {
+  async extractSlides() {
     this.slidesExtracting = fs
       .readdir(`${this.tempDirectory}/ppt/slides`)
       .then((res) => {
@@ -75,13 +76,13 @@ export default class Presentation {
         }
       });
   }
-  applySlideChanges() {
-    this.slides.forEach((slide) => {
-      slide.writeToFile(this.tempDirectory);
-    });
+  async applySlideChanges() {
+    await Promise.all(
+      this.slides.map(async (slide) => slide.writeToFile(this.tempDirectory))
+    );
   }
   generateNewPPT(outputPath: string) {
-    handleGenNewPpt(
+    return handleGenNewPpt(
       path.resolve(outputPath),
       path.resolve(`${this.tempDirectory}`)
     );
