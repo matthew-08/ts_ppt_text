@@ -1,6 +1,6 @@
 {
   "name": "ts_ppt_text",
-  "version": "1.2.3",
+  "version": "1.2.6",
   "description": "A simple TypeScript library for interfacing with PPT text nodes",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

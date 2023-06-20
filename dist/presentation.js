@@ -19,14 +19,12 @@ const prepareSlides_1 = __importDefault(require("./utils/prepareSlides"));
 const promises_1 = __importDefault(require("fs/promises"));
 const sortSlides_1 = __importDefault(require("./utils/sortSlides"));
 const handleGenNewPpt_1 = __importDefault(require("./utils/handleGenNewPpt"));
-const util_1 = require("util");
-const promiseExec = (0, util_1.promisify)(child_process_1.exec);
+const cwd_1 = __importDefault(require("./utils/cwd"));
 class Presentation {
     constructor(filePath, dirName) {
         this.filePath = filePath;
         this.dirName = dirName;
         this.tempDirectory = `${this.dirName}/_ppt-temp_`;
-        this.generateTempFile();
         this.slidesPreparing = null;
         this.slidesExtracting = null;
         this.slides = [];
@@ -40,10 +38,16 @@ class Presentation {
         });
     }
     generateTempFile() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const s = () => this.extractSlides();
-            yield promiseExec(`sh ./src/scripts/extract.sh ${this.tempDirectory} ${this.filePath}`).then((res) => {
-                s();
+        const child = (0, child_process_1.exec)(`sh ./scripts/extract.sh ${this.tempDirectory} ${this.filePath}`, {
+            cwd: (0, cwd_1.default)(),
+        }, (err, stdout) => {
+            console.log(err);
+            console.log(stdout);
+        });
+        return new Promise((resolve) => {
+            return child.on('close', (code) => {
+                console.log(code);
+                resolve(0);
             });
         });
     }
@@ -69,23 +73,25 @@ class Presentation {
         });
     }
     extractSlides() {
-        this.slidesExtracting = promises_1.default
-            .readdir(`${this.tempDirectory}/ppt/slides`)
-            .then((res) => {
-            const filterRels = res.filter((file) => file != '_rels');
-            const sortedFiles = (0, sortSlides_1.default)(filterRels);
-            if (sortedFiles) {
-                return this.generateSlides(sortedFiles);
-            }
+        return __awaiter(this, void 0, void 0, function* () {
+            this.slidesExtracting = promises_1.default
+                .readdir(`${this.tempDirectory}/ppt/slides`)
+                .then((res) => {
+                const filterRels = res.filter((file) => file != '_rels');
+                const sortedFiles = (0, sortSlides_1.default)(filterRels);
+                if (sortedFiles) {
+                    return this.generateSlides(sortedFiles);
+                }
+            });
         });
     }
     applySlideChanges() {
-        this.slides.forEach((slide) => {
-            slide.writeToFile(this.tempDirectory);
+        return __awaiter(this, void 0, void 0, function* () {
+            yield Promise.all(this.slides.map((slide) => __awaiter(this, void 0, void 0, function* () { return slide.writeToFile(this.tempDirectory); })));
         });
     }
     generateNewPPT(outputPath) {
-        (0, handleGenNewPpt_1.default)(path_1.default.resolve(outputPath), path_1.default.resolve(`${this.tempDirectory}`));
+        return (0, handleGenNewPpt_1.default)(path_1.default.resolve(outputPath), path_1.default.resolve(`${this.tempDirectory}`));
     }
 }
 exports.default = Presentation;

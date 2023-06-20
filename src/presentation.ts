@@ -36,10 +36,11 @@ export default class Presentation {
         cwd: cwd(),
       },
       (err, stdout) => {
+        console.log(err);
         console.log(stdout);
       }
     );
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       return child.on('close', (code) => {
         console.log(code);
         resolve(0);

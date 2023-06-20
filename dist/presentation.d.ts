@@ -8,10 +8,10 @@ export default class Presentation {
     private slidesExtracting;
     constructor(filePath: string, dirName: string);
     getSlides(): Promise<Slide[]>;
-    private generateTempFile;
+    generateTempFile(): Promise<unknown>;
     private addSlides;
     private generateSlides;
-    private extractSlides;
-    applySlideChanges(): void;
-    generateNewPPT(outputPath: string): void;
+    extractSlides(): Promise<void>;
+    applySlideChanges(): Promise<void>;
+    generateNewPPT(outputPath: string): Promise<unknown>;
 }

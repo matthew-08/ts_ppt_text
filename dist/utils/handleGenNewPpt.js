@@ -6,13 +6,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const child_process_1 = require("child_process");
 const cwd_1 = __importDefault(require("./cwd"));
 const handleGenNewPpt = (outputDir, inputDir) => {
-    (0, child_process_1.exec)(`sh ./scripts/zip.sh ${inputDir} ${outputDir}`, {
+    const child = (0, child_process_1.exec)(`sh ./scripts/zip.sh ${inputDir} ${outputDir}`, {
         cwd: (0, cwd_1.default)(),
-    }, (error, stdout, stderr) => {
-        if (error || stderr) {
-            console.log(error || stderr);
-        }
-        console.log(stdout);
+    }, (err) => {
+        console.log(err);
+    });
+    return new Promise((resolve) => {
+        child.on('close', resolve);
     });
 };
 exports.default = handleGenNewPpt;

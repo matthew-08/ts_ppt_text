@@ -14,5 +14,5 @@ export default class Slide {
     generateTextNodes(): void;
     editTextNode(nodeId: string, text: string): void;
     handleEdit(nodeStartingIndex: number, newText: string): void;
-    writeToFile(tempDirectory: string): void;
+    writeToFile(tempDirectory: string): Promise<void>;
 }
